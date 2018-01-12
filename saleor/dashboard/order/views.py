@@ -7,7 +7,6 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template.context_processors import csrf
 from django.template.response import TemplateResponse
 from django.utils.translation import pgettext_lazy
-from django_prices.templatetags.prices_i18n import gross
 from payments import PaymentStatus
 from prices import Price
 from satchless.item import InsufficientStock
@@ -25,6 +24,10 @@ from .forms import (
     RefundPaymentForm, ReleasePaymentForm, RemoveVoucherForm, ShipGroupForm)
 from .utils import (
     create_invoice_pdf, create_packing_slip_pdf, get_statics_absolute_url)
+
+
+# FIXME: remove stopgap function
+from saleor.prices_stopgap import gross
 
 
 @staff_member_required
