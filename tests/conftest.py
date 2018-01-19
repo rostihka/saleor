@@ -312,7 +312,9 @@ def product_list(product_type, default_category):
 def order_list(admin_user, billing_address):
     data = {
         'billing_address': billing_address, 'user': admin_user,
-        'user_email': admin_user.email, 'total': Amount(123, currency='USD')}
+        'user_email': admin_user.email,
+        'total_net': Amount(123, currency='USD'),
+        'total_tax': Amount(0, currency='USD')}
     order = Order.objects.create(**data)
     order1 = Order.objects.create(**data)
     order2 = Order.objects.create(**data)
