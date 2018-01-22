@@ -92,7 +92,7 @@ def add_variant_to_delivery_group(
             is_shipping_required=(
                 variant.product.product_type.is_shipping_required),
             quantity=quantity,
-            unit_price_net=price.net.value, # FIXME: replace with price field
+            unit_price_net=price.net.value,  # FIXME: replace with price field
             unit_price_gross=price.gross.value,
             stock=stock,
             stock_location=stock.location.name)
