@@ -9,7 +9,7 @@ from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import smart_text
 from PIL import Image
-from prices import Amount
+from prices import Money
 
 from saleor.cart import utils
 from saleor.cart.models import Cart
@@ -245,7 +245,7 @@ def product_in_stock(product_type, default_category):
     attributes = {smart_text(product_attr.pk): smart_text(attr_value.pk)}
 
     product = Product.objects.create(
-        name='Test product', price=Amount('10.00', currency='USD'),
+        name='Test product', price=Money('10.00', currency='USD'),
         product_type=product_type, attributes=attributes,
         category=default_category)
 
@@ -261,6 +261,7 @@ def product_in_stock(product_type, default_category):
     warehouse_2 = StockLocation.objects.create(name='Warehouse 2')
     warehouse_3 = StockLocation.objects.create(name='Warehouse 3')
     Stock.objects.create(
+<<<<<<< HEAD
         variant=variant, cost_price=Amount(1, currency='USD'),
         quantity=5, quantity_allocated=5, location=warehouse_1)
     Stock.objects.create(
@@ -268,6 +269,15 @@ def product_in_stock(product_type, default_category):
         quantity=5, quantity_allocated=5, location=warehouse_2)
     Stock.objects.create(
         variant=variant, cost_price=Amount(10, currency='USD'),
+=======
+        variant=variant, cost_price=Money('1.00', currency='USD'),
+        quantity=5, quantity_allocated=5, location=warehouse_1)
+    Stock.objects.create(
+        variant=variant, cost_price=Money('100.00', currency='USD'),
+        quantity=5, quantity_allocated=5, location=warehouse_2)
+    Stock.objects.create(
+        variant=variant, cost_price=Money('10.00', currency='USD'),
+>>>>>>> ee70c0bc... WIP update to prices beta 3
         quantity=5, quantity_allocated=0, location=warehouse_3)
     return product
 
@@ -278,7 +288,11 @@ def product_without_shipping(default_category):
         name='Type with no shipping', has_variants=False,
         is_shipping_required=False)
     product = Product.objects.create(
+<<<<<<< HEAD
         name='Test product', price=Decimal('10.00'),
+=======
+        name='Test product', price=Money('10.00', currency='USD'),
+>>>>>>> ee70c0bc... WIP update to prices beta 3
         product_type=product_type, category=default_category)
     variant = ProductVariant.objects.create(product=product, sku='SKU_B')
     return product
@@ -291,17 +305,17 @@ def product_list(product_type, default_category):
     attributes = {smart_text(product_attr.pk): smart_text(attr_value.pk)}
 
     product_1 = Product.objects.create(
-        name='Test product 1', price=Amount('10.00', currency='USD'),
+        name='Test product 1', price=Money('10.00', currency='USD'),
         product_type=product_type, attributes=attributes, is_published=True,
         category=default_category)
 
     product_2 = Product.objects.create(
-        name='Test product 2', price=Amount('20.00', currency='USD'),
+        name='Test product 2', price=Money('20.00', currency='USD'),
         product_type=product_type, attributes=attributes, is_published=False,
         category=default_category)
 
     product_3 = Product.objects.create(
-        name='Test product 3', price=Amount('20.00', currency='USD'),
+        name='Test product 3', price=Money('20.00', currency='USD'),
         product_type=product_type, attributes=attributes, is_published=True,
         category=default_category)
 
@@ -313,8 +327,8 @@ def order_list(admin_user, billing_address):
     data = {
         'billing_address': billing_address, 'user': admin_user,
         'user_email': admin_user.email,
-        'total_net': Amount(123, currency='USD'),
-        'total_tax': Amount(0, currency='USD')}
+        'total_net': Money(123, currency='USD'),
+        'total_tax': Money(0, currency='USD')}
     order = Order.objects.create(**data)
     order1 = Order.objects.create(**data)
     order2 = Order.objects.create(**data)
@@ -346,7 +360,7 @@ def product_with_image(product_in_stock, product_image):
 @pytest.fixture
 def unavailable_product(product_type, default_category):
     product = Product.objects.create(
-        name='Test product', price=Amount('10.00', currency='USD'),
+        name='Test product', price=Money('10.00', currency='USD'),
         product_type=product_type, is_published=False,
         category=default_category)
     return product
@@ -355,7 +369,7 @@ def unavailable_product(product_type, default_category):
 @pytest.fixture
 def product_with_images(product_type, default_category):
     product = Product.objects.create(
-        name='Test product', price=Amount('10.00', currency='USD'),
+        name='Test product', price=Money('10.00', currency='USD'),
         product_type=product_type, category=default_category)
     file_mock_0 = MagicMock(spec=File, name='FileMock0')
     file_mock_0.name = 'image0.jpg'
@@ -380,7 +394,7 @@ def voucher(db):  # pylint: disable=W0613
 def order_with_lines(order, product_type, default_category):
     group = DeliveryGroup.objects.create(order=order)
     product = Product.objects.create(
-        name='Test product', price=Amount('10.00', currency='USD'),
+        name='Test product', price=Money('10.00', currency='USD'),
         product_type=product_type, category=default_category)
 
     OrderLine.objects.create(
@@ -394,7 +408,7 @@ def order_with_lines(order, product_type, default_category):
         unit_price_gross=Decimal('10.00'),
     )
     product = Product.objects.create(
-        name='Test product 2', price=Amount('20.00', currency='USD'),
+        name='Test product 2', price=Money('20.00', currency='USD'),
         product_type=product_type, category=default_category)
 
     OrderLine.objects.create(
@@ -408,7 +422,7 @@ def order_with_lines(order, product_type, default_category):
         unit_price_gross=Decimal('20.00'),
     )
     product = Product.objects.create(
-        name='Test product 3', price=Amount('30.00', currency='USD'),
+        name='Test product 3', price=Money('30.00', currency='USD'),
         product_type=product_type, category=default_category)
 
     OrderLine.objects.create(
@@ -429,12 +443,12 @@ def order_with_lines(order, product_type, default_category):
 def order_with_lines_and_stock(order, product_type, default_category):
     group = DeliveryGroup.objects.create(order=order)
     product = Product.objects.create(
-        name='Test product', price=Amount('10.00', currency='USD'),
+        name='Test product', price=Money('10.00', currency='USD'),
         product_type=product_type, category=default_category)
     variant = ProductVariant.objects.create(product=product, sku='SKU_A')
     warehouse = StockLocation.objects.create(name='Warehouse 1')
     stock = Stock.objects.create(
-        variant=variant, cost_price=Amount(1, currency='USD'),
+        variant=variant, cost_price=Money(1, currency='USD'),
         quantity=5, quantity_allocated=3, location=warehouse)
     OrderLine.objects.create(
         delivery_group=group,
@@ -449,11 +463,11 @@ def order_with_lines_and_stock(order, product_type, default_category):
         stock_location=stock.location.name
     )
     product = Product.objects.create(
-        name='Test product 2', price=Amount('20.00', currency='USD'),
+        name='Test product 2', price=Money('20.00', currency='USD'),
         product_type=product_type, category=default_category)
     variant = ProductVariant.objects.create(product=product, sku='SKU_B')
     stock = Stock.objects.create(
-        variant=variant, cost_price=Amount(2, currency='USD'),
+        variant=variant, cost_price=Money(2, currency='USD'),
         quantity=2, quantity_allocated=2, location=warehouse)
     OrderLine.objects.create(
         delivery_group=group,
@@ -478,7 +492,7 @@ def order_with_variant_from_different_stocks(order_with_lines_and_stock):
     variant = ProductVariant.objects.get(sku=line.product_sku)
     warehouse_2 = StockLocation.objects.create(name='Warehouse 2')
     stock = Stock.objects.create(
-        variant=variant, cost_price=Amount(1, currency='USD'),
+        variant=variant, cost_price=Money(1, currency='USD'),
         quantity=5, quantity_allocated=2, location=warehouse_2)
     OrderLine.objects.create(
         delivery_group=line.delivery_group,
@@ -494,7 +508,7 @@ def order_with_variant_from_different_stocks(order_with_lines_and_stock):
     )
     warehouse_2 = StockLocation.objects.create(name='Warehouse 3')
     Stock.objects.create(
-        variant=variant, cost_price=Amount(1, currency='USD'),
+        variant=variant, cost_price=Money(1, currency='USD'),
         quantity=5, quantity_allocated=0, location=warehouse_2)
     return order_with_lines_and_stock
 
@@ -503,12 +517,12 @@ def order_with_variant_from_different_stocks(order_with_lines_and_stock):
 def delivery_group(order, product_type, default_category):
     group = DeliveryGroup.objects.create(order=order)
     product = Product.objects.create(
-        name='Test product', price=Amount('10.00', currency='USD'),
+        name='Test product', price=Money('10.00', currency='USD'),
         product_type=product_type, category=default_category)
     variant = ProductVariant.objects.create(product=product, sku='SKU_A')
     warehouse = StockLocation.objects.create(name='Warehouse 2')
     stock = Stock.objects.create(
-        variant=variant, cost_price=Amount(1, currency='USD'),
+        variant=variant, cost_price=Money(1, currency='USD'),
         quantity=5, quantity_allocated=3, location=warehouse)
     OrderLine.objects.create(
         delivery_group=group,

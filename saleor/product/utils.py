@@ -6,7 +6,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.db.models import F
 from django.utils.encoding import smart_text
 from django_prices.templatetags import prices_i18n
-from prices import Amount, Price, PriceRange
+from prices import Money, TaxedMoney, TaxedMoneyRange
 
 from . import ProductAvailabilityStatus, VariantAvailabilityStatus
 from ..cart.utils import get_cart_from_request, get_or_create_cart_from_request
@@ -310,13 +310,13 @@ def get_variant_availability_status(variant):
 
 
 def get_zero_price():
-    zero_amount = Amount(0, currency=settings.DEFAULT_CURRENCY)
-    return Price(net=zero_amount, gross=zero_amount)
+    zero_amount = Money(0, currency=settings.DEFAULT_CURRENCY)
+    return TaxedMoney(net=zero_amount, gross=zero_amount)
 
 
 def get_product_costs_data(product):
     zero_price = get_zero_price()
-    zero_price_range = PriceRange(zero_price, zero_price)
+    zero_price_range = TaxedMoneyRange(zero_price, zero_price)
     purchase_costs_range = zero_price_range
     gross_margin = (0, 0)
 
@@ -327,7 +327,7 @@ def get_product_costs_data(product):
     costs, margins = get_cost_data_from_variants(variants)
 
     if costs:
-        purchase_costs_range = PriceRange(min(costs), max(costs))
+        purchase_costs_range = TaxedMoneyRange(min(costs), max(costs))
     if margins:
         gross_margin = (margins[0], margins[-1])
     return purchase_costs_range, gross_margin

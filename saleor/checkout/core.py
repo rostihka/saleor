@@ -7,7 +7,7 @@ from django.db import transaction
 from django.forms.models import model_to_dict
 from django.utils.encoding import smart_text
 from django.utils.translation import get_language
-from prices import Amount, FixedDiscount, Price
+from prices import Money, FixedDiscount, TaxedMoney
 
 from ..cart.models import Cart
 from ..cart.utils import get_or_empty_db_cart
@@ -107,8 +107,8 @@ class Checkout:
             if self.shipping_method and partition.is_shipping_required():
                 shipping_cost = self.shipping_method.get_total()
             else:
-                zero_amount = Amount(0, currency=settings.DEFAULT_CURRENCY)
-                shipping_cost = Price(zero_amount, zero_amount)
+                zero_amount = Money(0, currency=settings.DEFAULT_CURRENCY)
+                shipping_cost = TaxedMoney(zero_amount, zero_amount)
             total_with_shipping = partition.get_total(
                 discounts=self.cart.discounts) + shipping_cost
 
@@ -215,7 +215,7 @@ class Checkout:
         currency = self.storage.get('discount_currency')
         name = self.storage.get('discount_name')
         if value is not None and name is not None and currency is not None:
-            return FixedDiscount(Amount(value, currency), name)
+            return FixedDiscount(Money(value, currency), name)
 
     @discount.setter
     def discount(self, discount):
@@ -302,8 +302,8 @@ class Checkout:
         self._add_to_user_address_book(
             self.billing_address, is_billing=True)
 
-        zero_amount = Amount(0, currency=settings.DEFAULT_CURRENCY)
-        zero = Price(zero_amount, zero_amount)
+        zero_amount = Money(0, currency=settings.DEFAULT_CURRENCY)
+        zero = TaxedMoney(zero_amount, zero_amount)
 
         shipping_price = (
             self.shipping_method.get_total() if self.shipping_method
@@ -378,8 +378,8 @@ class Checkout:
 
     def get_subtotal(self):
         """Calculate order total without shipping."""
-        zero_amount = Amount(0, currency=settings.DEFAULT_CURRENCY)
-        zero = Price(zero_amount, zero_amount)
+        zero_amount = Money(0, currency=settings.DEFAULT_CURRENCY)
+        zero = TaxedMoney(zero_amount, zero_amount)
 
         cost_iterator = (
             total - shipping_cost
@@ -389,8 +389,8 @@ class Checkout:
 
     def get_total(self):
         """Calculate order total with shipping."""
-        zero_amount = Amount(0, currency=settings.DEFAULT_CURRENCY)
-        zero = Price(zero_amount, zero_amount)
+        zero_amount = Money(0, currency=settings.DEFAULT_CURRENCY)
+        zero = TaxedMoney(zero_amount, zero_amount)
 
         cost_iterator = (
             total

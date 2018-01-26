@@ -9,7 +9,7 @@ from django.template.response import TemplateResponse
 from django.utils.translation import pgettext_lazy
 from django_prices.templatetags import prices_i18n
 from payments import PaymentStatus
-from prices import Amount, Price
+from prices import Money, TaxedMoney
 from satchless.item import InsufficientStock
 
 from ...core.utils import get_paginator_items
@@ -53,8 +53,8 @@ def order_details(request, order_pk):
     all_payments = order.payments.exclude(status=PaymentStatus.INPUT)
     payment = order.payments.last()
     groups = list(order)
-    zero_amount = Amount(0, currency=order.get_total().currency)
-    captured = preauthorized = Price(zero_amount, zero_amount)
+    zero_amount = Money(0, currency=order.get_total().currency)
+    captured = preauthorized = TaxedMoney(zero_amount, zero_amount)
     balance = captured - order.get_total()
     if payment:
         can_capture = (

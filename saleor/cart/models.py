@@ -8,9 +8,9 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.encoding import smart_str
 from django.utils.timezone import now
-from django_prices.models import AmountField
+from django_prices.models import MoneyField
 from jsonfield import JSONField
-from prices import Amount, Price
+from prices import Money, TaxedMoney
 from satchless.item import ItemLine, ItemList, partition
 
 from . import CartStatus, logger
@@ -94,7 +94,7 @@ class Cart(models.Model):
         'discount.Voucher', null=True, related_name='+',
         on_delete=models.SET_NULL)
     checkout_data = JSONField(null=True, editable=False)
-    total = AmountField(
+    total = MoneyField(
         currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2,
         default=0)
     quantity = models.PositiveIntegerField(default=0)
@@ -158,8 +158,8 @@ class Cart(models.Model):
             self.get_subtotal(item, **kwargs) for item in self.lines.all()]
         if not subtotals:
             raise AttributeError('Calling get_total() on an empty item set')
-        zero_amount = Amount(0, currency=settings.DEFAULT_CURRENCY)
-        zero = Price(zero_amount, zero_amount)
+        zero_amount = Money(0, currency=settings.DEFAULT_CURRENCY)
+        zero = TaxedMoney(zero_amount, zero_amount)
         return sum(subtotals, zero)
 
     def count(self):

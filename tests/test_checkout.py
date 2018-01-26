@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, Mock, patch
 
 from django.contrib.auth.models import AnonymousUser
-from prices import Amount, Price
+from prices import Money, TaxedMoney
 import pytest
 from satchless.item import InsufficientStock
 
@@ -52,7 +52,7 @@ def test_checkout_is_shipping_required():
 
 
 def test_checkout_deliveries():
-    item_price = Price(Amount(10, 'USD'), Amount(10, 'USD'))
+    item_price = TaxedMoney(Money(10, 'USD'), Money(10, 'USD'))
     partition = Mock(get_total=Mock(return_value=item_price),
                      get_price_per_item=Mock(return_value=item_price))
 
@@ -63,7 +63,7 @@ def test_checkout_deliveries():
     cart = Mock(partition=Mock(return_value=[partition]), currency='USD')
     checkout = Checkout(cart, AnonymousUser(), 'tracking_code')
     deliveries = list(checkout.deliveries)
-    assert deliveries[0][1] == Price(Amount(0, 'USD'), Amount(0, 'USD'))
+    assert deliveries[0][1] == TaxedMoney(Money(0, 'USD'), Money(0, 'USD'))
     assert deliveries[0][2] == partition.get_total()
     assert deliveries[0][0][0][0] == partition
 
@@ -72,7 +72,8 @@ def test_checkout_deliveries_with_shipping_method(monkeypatch):
     shipping_cost = 5
     items_cost = 5
 
-    items_price = Price(Amount(items_cost, 'USD'), Amount(items_cost, 'USD'))
+    items_price = TaxedMoney(
+        Money(items_cost, 'USD'), Money(items_cost, 'USD'))
     partition = Mock(
         is_shipping_required=MagicMock(return_value=True),
         get_total=Mock(return_value=items_price),
@@ -84,8 +85,8 @@ def test_checkout_deliveries_with_shipping_method(monkeypatch):
     partition.__iter__ = Mock(return_value=f())
     cart = Mock(partition=Mock(return_value=[partition]), currency='USD')
 
-    shipping_price = Price(Amount(shipping_cost, 'USD'),
-                           Amount(shipping_cost, 'USD'))
+    shipping_price = TaxedMoney(
+        Money(shipping_cost, 'USD'), Money(shipping_cost, 'USD'))
     shipping_method_mock = Mock(get_total=Mock(return_value=shipping_price))
     monkeypatch.setattr(Checkout, 'shipping_method', shipping_method_mock)
 
@@ -94,9 +95,9 @@ def test_checkout_deliveries_with_shipping_method(monkeypatch):
 
     deliveries = list(checkout.deliveries)
     assert deliveries[0][1] == shipping_price
-    assert deliveries[0][2] == Price(
-        Amount(items_cost + shipping_cost, 'USD'),
-        Amount(items_cost + shipping_cost, 'USD'))
+    assert deliveries[0][2] == TaxedMoney(
+        Money(items_cost + shipping_cost, 'USD'),
+        Money(items_cost + shipping_cost, 'USD'))
     assert deliveries[0][0][0][0] == partition
 
 
@@ -209,8 +210,8 @@ def test_checkout_discount(request_cart, sale, product_in_stock):
     variant = product_in_stock.variants.get()
     request_cart.add(variant, 1)
     checkout = Checkout(request_cart, AnonymousUser(), 'tracking_code')
-    assert checkout.get_total() == Price(
-        Amount(5, currency="USD"), Amount(5, currency="USD"))
+    assert checkout.get_total() == TaxedMoney(
+        Money(5, currency="USD"), Money(5, currency="USD"))
 
 
 def test_checkout_create_order_insufficient_stock(

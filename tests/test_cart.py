@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.urls import reverse
 from django_babel.templatetags.babel import currencyfmt
-from prices import Amount, Price
+from prices import Money, TaxedMoney
 import pytest
 from satchless.item import InsufficientStock
 
@@ -299,7 +299,7 @@ def test_adding_same_variant(cart, product_in_stock):
     cart.add(variant, 2)
     assert len(cart) == 1
     assert cart.count() == {'total_quantity': 3}
-    assert cart.get_total().gross == Amount(30, 'USD')
+    assert cart.get_total().gross == Money(30, 'USD')
 
 
 def test_replacing_same_variant(cart, product_in_stock):
@@ -603,8 +603,8 @@ def test_total_with_discount(client, sale, request_cart, product_in_stock):
     variant = product_in_stock.variants.get()
     request_cart.add(variant, 1)
     line = request_cart.lines.first()
-    assert line.get_total(discounts=sales) == Price(
-        Amount(5, 'USD'), Amount(5, 'USD'))
+    assert line.get_total(discounts=sales) == TaxedMoney(
+        Money(5, 'USD'), Money(5, 'USD'))
 
 
 def test_product_group():
@@ -733,10 +733,10 @@ def test_get_cart_data(request_cart_with_item, shipping_method):
     shipment_option = get_shipment_options('PL')
     cart_data = utils.get_cart_data(
         request_cart_with_item, shipment_option, 'USD', None)
-    assert cart_data['cart_total'] == Price(
-        Amount(10, 'USD'), Amount(10, 'USD'))
-    assert cart_data['total_with_shipping'].min_price == Price(
-        Amount(20, 'USD'), Amount(20, 'USD'))
+    assert cart_data['cart_total'] == TaxedMoney(
+        Money(10, 'USD'), Money(10, 'USD'))
+    assert cart_data['total_with_shipping'].min_price == TaxedMoney(
+        Money(20, 'USD'), Money(20, 'USD'))
 
 
 def test_get_cart_data_no_shipping(request_cart_with_item):
@@ -744,5 +744,5 @@ def test_get_cart_data_no_shipping(request_cart_with_item):
     cart_data = utils.get_cart_data(
         request_cart_with_item, shipment_option, 'USD', None)
     cart_total = cart_data['cart_total']
-    assert cart_total == Price(Amount(10, 'USD'), Amount(10, 'USD'))
+    assert cart_total == TaxedMoney(Money(10, 'USD'), Money(10, 'USD'))
     assert cart_data['total_with_shipping'].min_price == cart_total
